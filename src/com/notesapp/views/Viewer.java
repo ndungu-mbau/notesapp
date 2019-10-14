@@ -5,6 +5,8 @@ import com.notesapp.services.NotesService;
 import com.notesapp.models.Note;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 
 
@@ -14,8 +16,8 @@ public class Viewer extends JFrame {
 
     boolean editing;
 
-    public Viewer(int noteNumber) {
-        note = notesService.noteArrayList.get(noteNumber);
+    public Viewer(Note note) {
+        this.note = note;
         initComponents();
     }
 
@@ -35,7 +37,15 @@ public class Viewer extends JFrame {
         jButton3 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener( new WindowAdapter() {
+            public void windowClosing(WindowEvent e){
+                JFrame frame = (JFrame) e.getSource();
+                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                new Home().setVisible(true);
+            }
+        });
 
         jTextArea1.setText(note.content);
         jTextArea1.setEditable(false);
@@ -71,7 +81,7 @@ public class Viewer extends JFrame {
             String title = jTextField1.getText();
             String content = jTextArea1.getText();
             try {
-                notesService.updateNote(note.id, title, content);
+                notesService.updateNote(note, title, content);
                 jTextField1.setEditable(false);
                 jTextArea1.setEditable(false);
                 jButton1.setVisible(false);
@@ -84,7 +94,8 @@ public class Viewer extends JFrame {
 
         jButton3.addActionListener(evt -> {
             try {
-                notesService.deleteNote(note.id);
+                notesService.deleteNote(note);
+                new Home().setVisible(true);
                 this.dispose();
             } catch(SQLException e){
                 JOptionPane.showMessageDialog(null,"Error deleting note : " +e.getMessage());

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class UserService {
     static UserService ourInstance = new UserService();
     ArrayList<User> userArrayList;
-    User loggedInUser;
+    public User loggedInUser;
 
     public static UserService getInstance() {
         return ourInstance;
@@ -23,6 +23,7 @@ public class UserService {
         try {
             User newUser = User.insertUserToDB(username, password);
             userArrayList.add(newUser);
+            loggedInUser = newUser;
         } catch(SQLException e){
             if(e.getMessage().startsWith("Duplicate entry")){
                 throw new UsernameExistsError();

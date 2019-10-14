@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import com.notesapp.models.Note;
 
+import com.notesapp.views.Home;
+
 public class NotesService {
     public ArrayList<Note> noteArrayList;
     private static UserService userService = UserService.getInstance();
@@ -12,8 +14,14 @@ public class NotesService {
     public static NotesService getInstance() {
         return ourInstance;
     }
-    private NotesService(){
-        noteArrayList = Note.getAllNotesByUserId(userService.loggedInUser.id);
+     public ArrayList<Note> getUserNotes(int id){
+        try {
+            noteArrayList = Note.getAllNotesByUserId(id);
+        } catch(NullPointerException e){
+            noteArrayList = new ArrayList<>();
+            System.out.println("Error loading data : " +e.getMessage());
+        }
+        return noteArrayList;
     }
 
     public void createNote(String title, String content) throws SQLException{
@@ -21,13 +29,13 @@ public class NotesService {
         noteArrayList.add(newNote);
     }
 
-    public void updateNote(int noteId, String title, String content) throws SQLException{
-        Note updatedNote = Note.updateNoteInDB(noteId, title, content);
-        noteArrayList.add(noteId, updatedNote);
+    public void updateNote(Note note, String title, String content) throws SQLException{
+        Note updatedNote = Note.updateNoteInDB(note.id, title, content, userService.loggedInUser.id);
+        noteArrayList.set(noteArrayList.indexOf(note), updatedNote);
     }
 
-    public void deleteNote(int noteId) throws SQLException{
-        Note.deleteNoteInDB(noteId);
-        noteArrayList.remove(noteId);
+    public void deleteNote(Note note) throws SQLException{
+        Note.deleteNoteInDB(note.id);
+        noteArrayList.remove(note);
     }
 }

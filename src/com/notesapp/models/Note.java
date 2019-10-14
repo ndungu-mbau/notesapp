@@ -49,39 +49,38 @@ public class Note {
         pstmt.executeUpdate();
     }
 
-    public static Note updateNoteInDB(int noteId, String title, String content) throws SQLException{
+    public static Note updateNoteInDB(int noteId, String title, String content, int userId) throws SQLException{
         String sql = "UPDATE notes SET title=?, content=? WHERE id=?";
-        int userId=0;
 
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setString(1, title);
         pstmt.setString(2, content);
         pstmt.setInt(3, noteId);
 
-        int rowAffected = pstmt.executeUpdate();
-        System.out.println(rowAffected);
-        if(rowAffected == 1) {
-            ResultSet rs = pstmt.getGeneratedKeys();
-            if(rs.next()) {
-                userId = rs.getInt(4);
-            }
-        }
+        pstmt.executeUpdate();
+
         return new Note(noteId, title, content, userId);
     }
 
     public static ArrayList<Note> getAllNotesByUserId(int userId){
         ArrayList<Note> notesArrayList = new ArrayList<>();
-        String sql = "SELECT * FROM notes WHERE userid=?";
+        String sql = "SELECT * FROM notes WHERE userId=?";
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
 
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                notesArrayList.add(new Note(rs.getInt("id"),rs.getString("title"), rs.getString("content"), rs.getInt("userid")));
+            if(rs.next()) {
+                do{
+                    notesArrayList.add(new Note(rs.getInt("id"), rs.getString("title"), rs.getString("content"), rs.getInt("userid")));
+                }while(rs.next());
+            } else {
+                notesArrayList = new ArrayList<>();
             }
         } catch(SQLException e){
             System.out.println("Error getting info from db : " +e.getMessage());
+        } catch(NullPointerException e){
+            System.out.println("Error : " +e.getMessage());
         }
         return notesArrayList;
     }

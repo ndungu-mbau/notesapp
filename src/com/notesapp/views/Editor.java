@@ -4,6 +4,8 @@ package com.notesapp.views;
 import com.notesapp.services.NotesService;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 
 
@@ -29,7 +31,15 @@ public class Editor extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jTextField1 = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener( new WindowAdapter() {
+            public void windowClosing(WindowEvent e){
+                JFrame frame = (JFrame) e.getSource();
+                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                new Home().setVisible(true);
+            }
+        });
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -86,6 +96,7 @@ public class Editor extends javax.swing.JFrame {
 
         try {
             notesService.createNote(title, content);
+            new Home().setVisible(true);
             this.dispose();
         } catch(SQLException e){
             JOptionPane.showMessageDialog(null, "Error adding your note to database : " +e.getMessage());

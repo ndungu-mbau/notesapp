@@ -13,14 +13,26 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.notesapp.models.Note;
 import com.notesapp.services.NotesService;
+import com.notesapp.services.UserService;
+
+import java.util.ArrayList;
 
 public class Home extends JFrame {
     NotesService notesService = NotesService.getInstance();
+    UserService userService = UserService.getInstance();
+    ArrayList<Note> notesArrayList;
     /**
      * Creates new form Home
      */
     public Home() {
+        try {
+            notesArrayList = notesService.getUserNotes(userService.loggedInUser.id);
+        } catch(NullPointerException e){
+            System.out.println("Error : " +e.getMessage());
+            notesArrayList = new ArrayList<>();
+        }
         initComponents();
     }
 
@@ -34,11 +46,16 @@ public class Home extends JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList(notesService.noteArrayList.toArray());
+        jList1 = new javax.swing.JList(notesArrayList.toArray());
         jList1.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                new Viewer(jList1.getSelectedIndex()).setVisible(true);
+                int val = 1;
+                if(val==1) {
+                    new Viewer((Note) jList1.getSelectedValue()).setVisible(true);
+                    dispose();
+                }
+                val++;
             }
         });
         jLabel1 = new javax.swing.JLabel();
@@ -90,6 +107,7 @@ public class Home extends JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         new Editor().setVisible(true);
+        this.dispose();
         //this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
